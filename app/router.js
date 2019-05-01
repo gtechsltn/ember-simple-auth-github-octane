@@ -1,3 +1,4 @@
+/* eslint array-callback-return: 0 */
 import EmberRouter from "@ember/routing/router";
 import config from "./config/environment";
 
@@ -6,6 +7,8 @@ const Router = EmberRouter.extend({
   rootURL: config.rootURL
 });
 
-Router.map(function() {});
+Router.map(function() {
+  this.route("login");
+});
 
 export default Router;

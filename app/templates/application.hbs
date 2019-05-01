@@ -1,5 +1,16 @@
-{{!-- The following component displays Ember's default welcome message. --}}
-<WelcomePage />
-{{!-- Feel free to remove this! --}}
+<h1>Welcome to the Demo App!</h1>
+
+API Key: {{this.config.apiKey}} <br>
+
+{{#if this.session.isAuthenticated}}
+  Authenticated
+  <br>
+  <button onclick={{action this.logout}}>Log Out</button>
+{{else}}
+  Unauthenticated
+{{/if}}
+
+
+<hr>
 
 {{outlet}}

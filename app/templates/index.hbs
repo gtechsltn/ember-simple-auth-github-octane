@@ -1,0 +1,6 @@
+{{#if this.session.data.authenticated.authorizationCode}}
+  <p>Authorization Code: {{this.session.data.authenticated.authorizationCode}}</p>
+{{/if}}
+<img src={{this.model.avatarUrl}} alt="Avatar of {{this.model.login}}"> <br>
+Login: {{this.model.login}} <br>
+Full Name: {{this.model.name}}
