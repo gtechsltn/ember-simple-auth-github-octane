@@ -3,8 +3,8 @@
 This repository provides a minimal [Ember
 Octane](https://emberjs.com/editions/octane/) application for authentication
 and authorization with GitHub. It uses
-[`ember-simple-auth`](simplabs/ember-simple-auth) and
-[`torii`](Vestorly/torii) to provide the authentication and authorization.
+[`ember-simple-auth`](http://github.com/simplabs/ember-simple-auth) and
+[`torii`](http://github.com/Vestorly/torii) to provide the authentication and authorization.
 
 This guide is an update and reworking of [the guide provided by
 `ember-simple-auth`](https://github.com/simplabs/ember-simple-auth/blob/master/guides/auth-torii-with-github.md),
@@ -38,7 +38,7 @@ deserves an outline that is personalized for Ember:
 As with the original `ember-simple-auth` guide, the approach here mirrors any
 OAuth2 explicit grant flow used also by Facebook, Google, etc. 
 
-You can find a sequence diagram for the flow [here](simplabs/ember-simple-auth/guides/assets/esa-initial-flow.txt.png).
+You can find a sequence diagram for the flow [here](http://github.com/simplabs/ember-simple-auth/guides/assets/esa-initial-flow.txt.png).
 
 ## Set up and Configuration
 
@@ -47,8 +47,8 @@ experts, the short version is:
 
 1. Register your future app with GitHub and get its keys.
 2. Create a new Ember app
-3. Install `ember-simple-auth`, `torii`, `ember-cli-dotenv`, and
-   `ember-fetch`.
+3. Install `ember-simple-auth`, `torii`, `ember-cli-dotenv`,
+   `ember-data-github`, and `ember-fetch`.
 4. Wire up the app with `application`, `index`, and `login` routes.
 5. Configure Torii using the environment variables set in `.env`.
 
@@ -57,7 +57,9 @@ experts, the short version is:
 
 After logging in to GitHub, go to your [developer
 settings](https://github.com/settings/developers) and, in the “OAuth Apps”
-section, click on “New OAuth App.”
+section, click on “New OAuth App.” Fill in the form much like in this image.
+The first three fields can be filled out per your wishes, but take care with
+the Authorization callback URL.
 
 ![Registering an OAuth Application with
 GitHub](./assets/github-registering-oauth-application-2019.png)
@@ -65,13 +67,14 @@ GitHub](./assets/github-registering-oauth-application-2019.png)
 Note that the callback URL is `http://localhost:4200/torii/redirect.html`. Torii
 has [deprecated calling back to a non-static html
 page](https://github.com/Vestorly/torii#oauth-redirects) as doing so is a
-security vulnerability.
+security vulnerability. Previously, it was normal to redirect back to the
+Ember app itself.
 
 You will likely want to register different application keys for development
 and production, as the authorization callback URL will be different in both
 cases. For development, `http://localhost:4200/torii/redirect.html` is
 sufficient. For production, it will be
-`http://<your-great-app-domain>/torri/redirect.html`.
+`http://<your-great-app-domain>/torii/redirect.html`.
 
 Once you register your application, you will have a chance to add an
 application logo.  Most importantly, you will be given a client ID and a
@@ -112,6 +115,7 @@ One of our needed addons requires the preexistence of two files before it will
 install, so create a new file, `config/dotenv.js`:
 
 ```javascript
+// config/dotenv.js
 module.exports = function() {
   return {
     clientAllowedKeys: [
@@ -127,6 +131,7 @@ module.exports = function() {
 Then create `.env`, which should look something like this:
 
 ```sh
+# .env
 GITHUB_DEV_CLIENT_ID=<your GitHub client id created above>
 GITHUB_DEV_REDIRECT_URI=http://localhost:4200/torii/redirect.html
 DEV_TOKEN_EXCHANGE_URL=http://localhost:9999/authenticate
@@ -438,11 +443,11 @@ In short, the server must receive the authorization code your Ember app receives
 from GitHub and forward it back to GitHub in a `POST` request, wait for a
 response, and send it back to your Ember app.
 
-Gatekeeper expects the authorization code to come in the format of
-`http://<gatekeeper-server>/authenticate/<authorization-code>`, which is why
-we set the value of `DEV_TOKEN_EXCHANGE_URL` to
-`http://localhost:9999/authenticate` in the `.env`, which is the URL we will
-shortly be using.
+Gatekeeper expects the authorization code to come at the end of a URL in the
+format of `http://<gatekeeper-server>/authenticate/<authorization-code>`,
+which is why we set the value of `DEV_TOKEN_EXCHANGE_URL` to
+`http://localhost:9999/authenticate` in the `.env` file. This is the URL we
+will shortly be using.
 
 ### Build the Gatekeeper Server
 
@@ -466,9 +471,9 @@ OAUTH_CLIENT_SECRET=<your GitHub client secret created above>
 ```
 
 Note that for the token exchange, you need both the client id _and_ the client
-secret. These are the environment variables Gatekeeper is expecting, so do not
-change them. Finally, make the Gatekeeper server aware of the environment
-variables by adding, at the very top of `index.js`:
+secret. These are the environment variable names Gatekeeper is expecting, so
+do not change them. Finally, make the Gatekeeper server aware of the
+environment variables by adding, at the very top of `index.js`:
 
 ```javascript
 require("dotenv").config();
@@ -495,7 +500,8 @@ Gatekeeper, at your service: http://localhost:9999
 
 The lines for the `oauth_client_id` and `oauth_client_secret` should look
 similar to your client id and client secret. If they read `GIT***`, then the
-environment variables did not catch.
+environment variables did not catch. Make sure you added the `dotenv`
+configuration line at the top of `index.js`.
 
 ### Wire the Gatekeeper Server back to Ember
 
@@ -536,16 +542,17 @@ and inspect what was logged to it.
 
 The `authenticated` object should have three properties: `access_token`,
 `authenticator`, and `provider`. If you copy the token and use it in place of
-<OAUTH-TOKEN> in this `curl` command:
+`<OAUTH-TOKEN>` in this `curl` command:
 
 ```sh
 curl -H "Authorization: Bearer <OAUTH-TOKEN>" https://api.github.com/user
 ```
 
-You should receive your own user data. This sets the stage for the final step,
-incorporating the access token in fetching the user data from within Ember.
+You should receive your own user data flashed to the terminal. This sets the
+stage for the final step, incorporating the access token in fetching the user
+data from within Ember.
 
-## Populate a Model with Data from GitHub.
+## Populate a Model with Data from GitHub
 
 In previous versions of `ember-simple-auth`, this next step was cleanly
 accomplished with an `authorizer`, but authorizers [have been
@@ -638,10 +645,13 @@ services. Then, update the appropriate line in your Ember app’s `.env` to
 point to the Heroku url, not `http://localhost:9999/authenticate`.
 
 Finally, I’ve created a repo of the “finished” version of this guide, and it
-is available at @muziejus/ember-simple-auth-github-octane.
+is available at
+[@muziejus/ember-simple-auth-github-octane](http://github.com/muziejus/ember-simple-auth-github-octane).
 
-Here are some other links provided by @srvance, @aspala, @marcoow, and
-@jordan-storz, the authors of the original version of this guide:
+Here are some other links provided by [@srvance](http://github.com/srvance),
+[@aspala](http://github.com/aspala), [@marcoow](http://github.com/marcoow),
+and [@jordan-storz](http://github.com/jordan-storz), the authors of the
+original version of this guide:
 
 * [simple-auth-torii-github-demo](https://github.com/srvance/simple-auth-torii-github-demo) is a repo created to follow
 the steps of this guide. All elements of the guide except the token exchange service are contained here.
