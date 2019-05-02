@@ -218,7 +218,7 @@ properties that will be defined on the route controllers in later steps.
 When you spin up the server again with `ember serve`, you should see, at
 `http://localhost:4200`, something like this:
 
-![Initial Ember Octane App page]()
+![Initial Ember Octane App page](./assets/initial-ember-octane-app-page.png)
 
 Incidentally, while the server was spinning up, it probably complained that
 Torii has not yet been configured, so let’s do that.
