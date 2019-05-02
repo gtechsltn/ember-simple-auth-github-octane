@@ -6,15 +6,18 @@ module.exports = function(environment) {
     modulePrefix: "ember-simple-auth-github-octane",
     environment,
     rootURL: "/",
-    locationType: "auto",
     torii: {
       sessionServiceName: "session",
       providers: {
         "github-oauth2": {
-          scope: "repo user"
+          scope: "repo user",
+          apiKey: process.env.GITHUB_DEV_CLIENT_ID,
+          redirectUri: process.env.GITHUB_DEV_REDIRECT_URI,
+          tokenExchangeUri: process.env.DEV_TOKEN_EXCHANGE_URL
         }
       }
     },
+    locationType: "auto",
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
@@ -44,12 +47,6 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
-    ENV.torii.providers["github-oauth2"].apiKey =
-      process.env.GITHUB_DEV_CLIENT_ID;
-    ENV.torii.providers["github-oauth2"].redirectUri =
-      process.env.GITHUB_DEV_REDIRECT_URI;
-    ENV.torii.providers["github-oauth2"].tokenExchangeUri =
-      process.env.DEV_TOKEN_EXCHANGE_URL;
   }
 
   if (environment === "test") {

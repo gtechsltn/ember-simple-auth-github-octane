@@ -1,13 +1,17 @@
 /* eslint camelcase: 0 */
-import { isPresent } from "@ember/utils";
+import { computed } from "@ember/object";
 import DataAdapterMixin from "ember-simple-auth/mixins/data-adapter-mixin";
 import GitHubUserAdapter from "ember-data-github/adapters/github-user";
 
 export default GitHubUserAdapter.extend(DataAdapterMixin, {
-  authorize(xhr) {
-    const { access_token } = this.session.data.authenticated;
-    if (isPresent(access_token)) {
-      xhr.setRequestHeader("Authorization", `Bearer ${access_token}`);
+  headers: computed("session.data.authenticated.access_token", function() {
+    const headers = {};
+    if (this.session.isAuthenticated) {
+      headers.Authorization = `Bearer ${
+        this.session.data.authenticated.access_token
+      }`;
     }
-  }
+
+    return headers;
+  })
 });

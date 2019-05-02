@@ -1,16 +1,15 @@
-<h1>Welcome to the Demo App!</h1>
+{{!-- app/templates/application.hbs --}}
+<h1>My Ember Octane App</h1>
+<h2>Secret API Key: {{this.config.apiKey}}</h2>
 
-API Key: {{this.config.apiKey}} <br>
-
-{{#if this.session.isAuthenticated}}
-  Authenticated
-  <br>
-  <button onclick={{action this.logout}}>Log Out</button>
-{{else}}
-  Unauthenticated
-{{/if}}
-
-
+<p>
+  {{#if this.session.isAuthenticated}}
+    Authenticated <br>
+    <button onclick={{action this.logout}}>Log Out</button>
+  {{else}}
+    Unauthenticated
+  {{/if}}
+</p>
 <hr>
 
 {{outlet}}
